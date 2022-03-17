@@ -1,0 +1,7 @@
+increase symbol size
+change y and x labels
+increase size of numbers in axes 
+increase margins
+
+Allow for selection by urban
+

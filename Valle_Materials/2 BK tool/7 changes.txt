@@ -1,0 +1,6 @@
+https://shiny.rstudio.com/tutorial/written-tutorial/lesson3/
+
+exploring other widgets
+- radioButtons
+- sliders (age range)
+
