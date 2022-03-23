@@ -81,13 +81,6 @@ ggplot() +
 ### Import and add all separate .shp as one file for ease of use ###
 # Obtained from BOEM (https://www.boem.gov/renewable-energy/mapping-and-data/renewable-energy-gis-data)
 
-# # identify all shapefiles
-# layers <- grep("\\.shp$", list.files("Cullen_Materials/BOEM-Renewable-Energy-Shapefiles_1/",
-#                                      full.names = TRUE), value = TRUE)
-# 
-# # load into single spatial object
-# wind <- lapply(layers, st_read)
-
 # only import relevant polygons
 wind <- st_read("Cullen_Materials/BOEM-Renewable-Energy-Shapefiles_1/BOEMWindLeases_OutlinePolys.shp") %>% 
   st_transform(4326)
@@ -98,11 +91,11 @@ ggplot() +
   geom_raster(data = sst.coarse.df %>%
                 filter(month == 8), aes(x, y, fill = sst)) +
   scale_fill_cmocean() +
-  # geom_sf(data = wind) +
+  geom_sf(data = wind) +
   theme_bw() +
   scale_x_continuous(expand = c(0,0)) +
   scale_y_continuous(expand = c(0,0)) +
-  coord_fixed()
+  coord_sf()
 
 
 
@@ -112,6 +105,7 @@ ggplot() +
 ### Simulate tracks w/in study region ###
 
 # choose different starting points (lon, lat) in Mid-Atlantic Bight
+# using locator() function and clicking on different parts of map
 sim.tracks <- data.frame(x = c(-71.50604, -75, -72, -71, -73),
                          y = c(39.71869, 37, 38.5, 40, 39)) %>% 
   st_as_sf(., coords = c('x','y'), crs = 4326) %>% 

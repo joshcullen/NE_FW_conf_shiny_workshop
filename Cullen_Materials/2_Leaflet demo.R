@@ -8,9 +8,7 @@ library(tidyverse)
 library(raster)
 library(sf)
 library(leaflet)
-# library(leafem)
-# library(shiny)
-
+library(leafem)
 library(viridis)
 library(htmltools)
 
@@ -46,22 +44,19 @@ wind$State <- gsub(pattern = "Massachussets", "Massachusetts", wind$State)  #fix
 print(providers)
 
 # Ocean Basemap
-leaflet(tracks.sf) %>% 
+leaflet() %>% 
   addProviderTiles(providers$Esri.OceanBasemap) %>% 
-  addRasterImage(sst.rast[[1]]) %>% 
-  addFeatures(radius = 1, opacity = 0.2)
+  setView(lng = -73, lat = 41.5, zoom = 6)
 
 # Satellite Imagery Basemap
-leaflet(tracks.sf) %>% 
+leaflet() %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>% 
-  addRasterImage(sst.rast[[1]]) %>% 
-  addFeatures(radius = 1, opacity = 0.2)
+  setView(lng = -73, lat = 41.5, zoom = 6)
 
 # OSM Basemap
-leaflet(tracks.sf) %>% 
+leaflet() %>% 
   addProviderTiles(providers$OpenStreetMap) %>% 
-  addRasterImage(sst.rast[[1]]) %>% 
-  addFeatures(radius = 1, opacity = 0.2)
+  setView(lng = -73, lat = 41.5, zoom = 6)
 
 
 
@@ -86,8 +81,6 @@ leaflet(tracks.sf) %>%
 
 
 # Add points from data.frame object w/ customized size and opacity
-tracks.pal <- colorFactor("Dark2", factor(tracks$id))
-
 leaflet(tracks) %>% 
   addProviderTiles(providers$Esri.OceanBasemap) %>% 
   addCircleMarkers(lng = ~x,
@@ -97,6 +90,8 @@ leaflet(tracks) %>%
 
 
 # Add points from data.frame object w/ customized colors, labels, and legend
+tracks.pal <- colorFactor("Dark2", factor(tracks$id))
+
 leaflet(tracks) %>% 
   addProviderTiles(providers$Esri.OceanBasemap) %>% 
   addCircleMarkers(lng = ~x,
@@ -159,7 +154,7 @@ leaflet(tracks.sf2) %>%
   addPolylines(color = ~tracks.pal(id))
 
 
-## Add lines from sf object and customize colors, size, and add legend
+# Add lines from sf object and customize colors, size, and add legend
 leaflet(tracks.sf2) %>% 
   addProviderTiles(providers$Esri.OceanBasemap) %>% 
   addPolylines(color = ~tracks.pal(id),
@@ -252,17 +247,7 @@ leaflet() %>%
                    options = layersControlOptions(collapsed = TRUE))
 
 
-# Add dynamic scale bar
-leaflet() %>% 
-  addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap") %>%
-  addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery") %>%
-  addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map") %>% 
-  addLayersControl(baseGroups = c("Ocean Basemap", "World Imagery", "Open Street Map"),
-                   options = layersControlOptions(collapsed = TRUE)) %>% 
-  addScaleBar(position = "bottomright")
-
-
-# Add measurement tool (linear and area)
+# Add dynamic scale bar and measurement tool (linear and area)
 leaflet() %>% 
   addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap") %>%
   addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery") %>%
@@ -432,4 +417,61 @@ leaflet() %>%
              primaryAreaUnit = "hectares",
              activeColor = "#3D535D",
              completedColor = "#7D4479")
+
+
+
+# Add features from {leafem}, including raster querying and mouse coordinates
+leaflet() %>% 
+  addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap",
+                   options = tileOptions(zIndex = -10)) %>%
+  addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery",
+                   options = tileOptions(zIndex = -10)) %>%
+  addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map",
+                   options = tileOptions(zIndex = -10)) %>% 
+  addRasterImage(x = sst.rast[[2]],
+                 colors = rast.pal2,
+                 opacity = 1,
+                 group = "Feb SST") %>% 
+  addImageQuery(sst.rast[[2]], group = "Feb SST") %>%  #add raster query
+  addRasterImage(x = sst.rast[[8]],
+                 colors = rast.pal2,
+                 opacity = 1,
+                 group = "Aug SST") %>% 
+  addImageQuery(sst.rast[[8]], group = "Aug SST") %>%  #add raster query
+  addLegend_decreasing(pal = rast.pal2,
+                       values = as.vector(values(sst.rast)),
+                       title = "SST (\u00B0C)",
+                       decreasing = TRUE) %>% 
+  addPolygons(data = wind,
+              color = ~poly.pal(State),
+              fillOpacity = 1,
+              stroke = FALSE,
+              label = ~paste0("State: ", State),
+              group = "Offshore Wind Leases") %>% 
+  addLegend(pal = poly.pal,
+            values = wind$State,
+            title = "State",
+            opacity = 1) %>% 
+  addPolylines(data = tracks.sf2,
+               color = ~tracks.pal(id),
+               opacity = 0.75,
+               weight = 2,
+               label = ~paste0("ID: ", id),
+               group = "Tracks") %>% 
+  addLegend(pal = tracks.pal,
+            values = tracks.sf2$id,
+            title = "ID",
+            position = "topleft") %>% 
+  addLayersControl(baseGroups = c("Ocean Basemap", "World Imagery", "Open Street Map"),
+                   overlayGroups = c("Feb SST", "Aug SST", "Offshore Wind Leases", "Tracks"),
+                   options = layersControlOptions(collapsed = TRUE, autoZIndex = FALSE),
+                   position = "bottomleft") %>% 
+  addScaleBar(position = "bottomright") %>% 
+  addMeasure(position = "topleft",
+             primaryLengthUnit = "kilometers",
+             primaryAreaUnit = "hectares",
+             activeColor = "#3D535D",
+             completedColor = "#7D4479") %>% 
+  addMouseCoordinates() 
+  
 
