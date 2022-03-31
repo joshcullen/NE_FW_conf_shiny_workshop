@@ -12,7 +12,6 @@ library(sf)
 library(leaflet)
 library(leafem)
 library(viridis)
-library(htmltools)
 library(shiny)
 
 source("helper functions.R")  #for function addLegend_decreasing
@@ -68,12 +67,9 @@ server <- function(input, output, session) {
   output$mymap <- renderLeaflet({
     
   leaflet() %>% 
-    addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap",
-                     options = tileOptions(zIndex = -10)) %>%
-    addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery",
-                     options = tileOptions(zIndex = -10)) %>%
-    addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map",
-                     options = tileOptions(zIndex = -10)) %>%
+    addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap") %>%
+    addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery") %>%
+    addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map") %>%
     addRasterImage(x = sst.rast[[2]],
                    colors = rast.pal2,
                    opacity = 1,
@@ -110,7 +106,7 @@ server <- function(input, output, session) {
               position = "topleft") %>%
     addLayersControl(baseGroups = c("Ocean Basemap", "World Imagery", "Open Street Map"),
                      overlayGroups = c("Feb SST", "Aug SST", "Offshore Wind Leases", "Tracks"),
-                     options = layersControlOptions(collapsed = TRUE, autoZIndex = FALSE),
+                     options = layersControlOptions(collapsed = TRUE, autoZIndex = TRUE),
                      position = "bottomleft") %>%
     addScaleBar(position = "bottomright") %>%
     addMeasure(position = "topleft",

@@ -11,7 +11,6 @@ library(sf)
 library(leaflet)
 library(leafem)
 library(viridis)
-library(htmltools)
 library(shiny)
 library(shinyWidgets)
 
@@ -59,8 +58,7 @@ ui <- fluidPage(title = "Animal Movement, Offshore Wind Development, and SST",
                 
                 leafletOutput("mymap", width = "100%", height = "850px"),
                 
-                absolutePanel(id = "controls",
-                              class = "panel panel-default",
+                absolutePanel(class = "panel panel-default",
                               top = 300,
                               left = 25,
                               width = 250,
@@ -122,15 +120,12 @@ server <- function(input, output, session) {
     ## Static Leaflet basemap and widgets
     leaflet() %>% 
       setView(lng = -73, lat = 41.5, zoom = 6) %>% 
-      addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap",
-                       options = tileOptions(zIndex = -10)) %>%
-      addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery",
-                       options = tileOptions(zIndex = -10)) %>%
-      addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map",
-                       options = tileOptions(zIndex = -10)) %>%
+      addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap") %>%
+      addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery") %>%
+      addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map") %>%
       addLayersControl(baseGroups = c("Ocean Basemap", "World Imagery", "Open Street Map"),
                        overlayGroups = c("SST", "Offshore Wind Leases", "Tracks"),
-                       options = layersControlOptions(collapsed = TRUE, autoZIndex = FALSE),
+                       options = layersControlOptions(collapsed = TRUE, autoZIndex = TRUE),
                        position = "bottomleft") %>%
       addScaleBar(position = "bottomright") %>%
       addMeasure(position = "topleft",

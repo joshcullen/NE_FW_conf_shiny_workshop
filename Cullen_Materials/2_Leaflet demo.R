@@ -1,8 +1,10 @@
 
 
-################################################
-### Create simulations using common distribs ###
-################################################
+#############################################
+### Learn to use Leaflet outside of Shiny ###
+#############################################
+
+### For more detailed information and examples, visit https://rstudio.github.io/leaflet/
 
 library(tidyverse)
 library(raster)
@@ -10,10 +12,11 @@ library(sf)
 library(leaflet)
 library(leafem)
 library(viridis)
-library(htmltools)
 
 source("Cullen_Materials/helper functions.R")
 
+
+# Random fact: {terra} SpatRaster layers are not yet compatible w/ {leaflet}; need to use {raster} or {stars}
 
 
 ## Load data
@@ -32,6 +35,7 @@ sst.rast <- sst.rast2 <- sst %>%
 
 # Offshore wind leases
 wind <- st_read("Cullen_Materials/NE_Offshore_Wind.shp")
+unique(wind$State)
 wind$State <- gsub(pattern = "Massachussets", "Massachusetts", wind$State)  #fix typo
 
 
@@ -41,7 +45,7 @@ wind$State <- gsub(pattern = "Massachussets", "Massachusetts", wind$State)  #fix
 
 ## Example 1: Create basemap
 
-print(providers)
+print(providers)  #many different basemap tiles available; doesn't include other WMS
 
 # Ocean Basemap
 leaflet() %>% 
@@ -114,7 +118,8 @@ leaflet(tracks) %>%
                    opacity = 0.5,
                    color = ~tracks.pal(id),
                    popup = ~paste0("ID: ", id,
-                                   "<br> State: ", state)) %>% 
+                                   "<br> Long: ", x,
+                                   "<br> Lat: ", y)) %>% 
   addLegend(pal = tracks.pal,
             values = ~id,
             title = "ID")
@@ -264,12 +269,9 @@ leaflet() %>%
 
 # Add in raster layer w/ option to turn on/off
 leaflet() %>% 
-  addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap",
-                   options = tileOptions(zIndex = -10)) %>%
-  addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery",
-                   options = tileOptions(zIndex = -10)) %>%
-  addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map",
-                   options = tileOptions(zIndex = -10)) %>% 
+  addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap") %>%
+  addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery") %>%
+  addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map") %>% 
   addRasterImage(x = sst.rast[[1]],
                  colors = rast.pal,
                  opacity = 0.8,
@@ -280,7 +282,7 @@ leaflet() %>%
                        decreasing = TRUE) %>% 
   addLayersControl(baseGroups = c("Ocean Basemap", "World Imagery", "Open Street Map"),
                    overlayGroups = "Jan SST",
-                   options = layersControlOptions(collapsed = TRUE, autoZIndex = FALSE)) %>% 
+                   options = layersControlOptions(collapsed = TRUE, autoZIndex = TRUE)) %>% 
   addScaleBar(position = "bottomright") %>% 
   addMeasure(position = "topleft",
              primaryLengthUnit = "kilometers",
@@ -296,12 +298,9 @@ rast.pal2 <- colorNumeric(palette = viridis::viridis(100, option = 'magma'),
                           na.color = "transparent")
 
 leaflet() %>% 
-  addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap",
-                   options = tileOptions(zIndex = -10)) %>%
-  addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery",
-                   options = tileOptions(zIndex = -10)) %>%
-  addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map",
-                   options = tileOptions(zIndex = -10)) %>% 
+  addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap") %>%
+  addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery") %>%
+  addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map") %>% 
   addRasterImage(x = sst.rast[[2]],
                  colors = rast.pal2,
                  opacity = 1,
@@ -316,7 +315,7 @@ leaflet() %>%
                        decreasing = TRUE) %>% 
   addLayersControl(baseGroups = c("Ocean Basemap", "World Imagery", "Open Street Map"),
                    overlayGroups = c("Feb SST", "Aug SST"),
-                   options = layersControlOptions(collapsed = TRUE, autoZIndex = FALSE)) %>% 
+                   options = layersControlOptions(collapsed = TRUE, autoZIndex = TRUE)) %>% 
   addScaleBar(position = "bottomright") %>% 
   addMeasure(position = "topleft",
              primaryLengthUnit = "kilometers",
@@ -327,12 +326,9 @@ leaflet() %>%
 
 # Add polygons w/ ability to turn on/off
 leaflet() %>% 
-  addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap",
-                   options = tileOptions(zIndex = -10)) %>%
-  addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery",
-                   options = tileOptions(zIndex = -10)) %>%
-  addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map",
-                   options = tileOptions(zIndex = -10)) %>% 
+  addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap") %>%
+  addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery") %>%
+  addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map") %>% 
   addRasterImage(x = sst.rast[[2]],
                  colors = rast.pal2,
                  opacity = 1,
@@ -357,7 +353,7 @@ leaflet() %>%
             opacity = 1) %>% 
   addLayersControl(baseGroups = c("Ocean Basemap", "World Imagery", "Open Street Map"),
                    overlayGroups = c("Feb SST", "Aug SST", "Offshore Wind Leases"),
-                   options = layersControlOptions(collapsed = TRUE, autoZIndex = FALSE),
+                   options = layersControlOptions(collapsed = TRUE, autoZIndex = TRUE),
                    position = "bottomleft") %>% 
   addScaleBar(position = "bottomright") %>% 
   addMeasure(position = "topleft",
@@ -369,12 +365,9 @@ leaflet() %>%
 
 # Add lines w/ ability to turn on/off
 leaflet() %>% 
-  addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap",
-                   options = tileOptions(zIndex = -10)) %>%
-  addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery",
-                   options = tileOptions(zIndex = -10)) %>%
-  addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map",
-                   options = tileOptions(zIndex = -10)) %>% 
+  addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap") %>%
+  addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery") %>%
+  addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map") %>% 
   addRasterImage(x = sst.rast[[2]],
                  colors = rast.pal2,
                  opacity = 1,
@@ -409,7 +402,7 @@ leaflet() %>%
             position = "topleft") %>% 
   addLayersControl(baseGroups = c("Ocean Basemap", "World Imagery", "Open Street Map"),
                    overlayGroups = c("Feb SST", "Aug SST", "Offshore Wind Leases", "Tracks"),
-                   options = layersControlOptions(collapsed = TRUE, autoZIndex = FALSE),
+                   options = layersControlOptions(collapsed = TRUE, autoZIndex = TRUE),
                    position = "bottomleft") %>% 
   addScaleBar(position = "bottomright") %>% 
   addMeasure(position = "topleft",
@@ -422,12 +415,9 @@ leaflet() %>%
 
 # Add features from {leafem}, including raster querying and mouse coordinates
 leaflet() %>% 
-  addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap",
-                   options = tileOptions(zIndex = -10)) %>%
-  addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery",
-                   options = tileOptions(zIndex = -10)) %>%
-  addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map",
-                   options = tileOptions(zIndex = -10)) %>% 
+  addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap") %>%
+  addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery") %>%
+  addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map") %>% 
   addRasterImage(x = sst.rast[[2]],
                  colors = rast.pal2,
                  opacity = 1,
@@ -464,7 +454,7 @@ leaflet() %>%
             position = "topleft") %>% 
   addLayersControl(baseGroups = c("Ocean Basemap", "World Imagery", "Open Street Map"),
                    overlayGroups = c("Feb SST", "Aug SST", "Offshore Wind Leases", "Tracks"),
-                   options = layersControlOptions(collapsed = TRUE, autoZIndex = FALSE),
+                   options = layersControlOptions(collapsed = TRUE, autoZIndex = TRUE),
                    position = "bottomleft") %>% 
   addScaleBar(position = "bottomright") %>% 
   addMeasure(position = "topleft",

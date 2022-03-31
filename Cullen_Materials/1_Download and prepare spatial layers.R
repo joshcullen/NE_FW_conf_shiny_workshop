@@ -124,10 +124,10 @@ sim.tracks.list <- split(sim.tracks, seq(nrow(sim.tracks)))
 set.seed(2)
 
 nobs<- rep(1000, each = 5)  #tracks are 1000 obs long each
-SL.params<- data.frame(shape=c(0.25, 2, 10), scale = c(0.001, 0.001, 0.001))
-TA.params<- data.frame(mu=c(pi, pi, 0), rho = c(0.8, 1e-12, 0.9))  #error if rho == 0
+SL.params<- data.frame(shape=c(0.25, 2, 10), scale = c(0.001, 0.001, 0.001))  #gamma distrib
+TA.params<- data.frame(mu=c(pi, pi, 0), rho = c(0.8, 1e-12, 0.9))  #wrapped Cauchy distrib; error if rho == 0
 
-# simulate from HMM
+# simulate from HMM w/ 3 behavioral states
 tic()
 tracks<- HMM.sim(nsim = 5,
                  nobs = nobs,
