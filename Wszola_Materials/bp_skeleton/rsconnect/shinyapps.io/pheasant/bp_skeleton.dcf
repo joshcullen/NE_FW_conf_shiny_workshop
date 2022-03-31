@@ -1,0 +1,13 @@
+name: bp_skeleton
+title: bp_skeleton
+username:
+account: pheasant
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5965127
+bundleId: 5747933
+url: https://pheasant.shinyapps.io/bp_skeleton/
+when: 1648693620.73639
+lastSyncTime: 1648693620.73639
+asMultiple: FALSE
+asStatic: FALSE
