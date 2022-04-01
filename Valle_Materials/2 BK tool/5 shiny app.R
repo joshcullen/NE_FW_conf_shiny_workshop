@@ -17,7 +17,9 @@ ui <- fluidPage(
     #define what will be shown in side bar panel
     sidebarPanel(
       width=3,
-      selectInput("region", "Choose region:",choices = uni)
+      selectInput(inputId="region1", 
+                  label="Choose region:",
+                  choices = uni)
     ),
 
     #define what will be shown in main panel
@@ -35,7 +37,7 @@ server <- function(input, output) {
     # process data based on user inputs
     data <- reactive({
       cond=dat1$fever2wk==0 & dat1$male==0 & 
-        dat1$reg==input$region & dat1$urban==0
+        dat1$reg==input$region1 & dat1$urban==0
       dat2=dat1[cond,]
     })
     

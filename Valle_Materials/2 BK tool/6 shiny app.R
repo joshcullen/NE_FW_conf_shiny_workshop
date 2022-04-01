@@ -17,8 +17,12 @@ ui <- fluidPage(
     #define what will be shown in side bar panel
     sidebarPanel(
       width=3,
-      selectInput("region", "Choose region:",choices = uni),
-      selectInput("urban", "Urban?",choices = c('yes','no'))
+      selectInput(inputId="region", 
+                  label="Choose region:",
+                  choices = uni),
+      selectInput(inputId="urban", 
+                  label="Urban?",
+                  choices = c('yes','no'))
     ),
 
     #define what will be shown in main panel

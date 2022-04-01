@@ -16,10 +16,20 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       width=3,
-      selectInput("region", "Choose region:",choices = uni),
-      selectInput("urban", "Urban?",choices = c('yes','no')),
-      radioButtons('fever2wk','Fever in past 2 weeks?',choices=c('yes','no')),
-      sliderInput('ager','Age range',min=0,max=5,value=c(0,5),step=0.5)
+      selectInput(inputId="region", 
+                  label="Choose region:",
+                  choices = uni),
+      selectInput(inputId="urban", 
+                  label="Urban?",
+                  choices = c('yes','no')),
+      radioButtons(inputId='fever2wk',
+                   label='Fever in past 2 weeks?',
+                   choices=c('yes','no')),
+      sliderInput(inputId='ager',
+                  label='Age range',
+                  min=0,max=5,
+                  value=c(0,5),
+                  step=0.5)
     ),
 
     #main panel
@@ -60,6 +70,7 @@ server <- function(input, output) {
       points(pinf.rdt0~age,data=dat3,pch=19,col='blue',cex=2)
       points(pinf.rdt1~age,data=dat3,pch=19,col='red',cex=2)
     })
+    
 }
 
 # Run the application 
