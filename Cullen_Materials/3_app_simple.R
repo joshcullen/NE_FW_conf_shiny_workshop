@@ -21,23 +21,23 @@ source("helper functions.R")  #for function addLegend_decreasing
 ### Load data ###
 
 # Simulated tracks
-tracks <- read.csv("Simulated tracks.csv")
-tracks.sf <- tracks %>% 
+tracks <- read.csv("Data/Simulated tracks.csv")
+tracks.sf <- tracks %>%
   st_as_sf(., coords = c('x','y'), crs = 4326)
-tracks.sf2 <- tracks.sf %>% 
-  group_by(id) %>% 
-  summarize(do_union = FALSE) %>% 
+tracks.sf2 <- tracks.sf %>%
+  group_by(id) %>%
+  summarize(do_union = FALSE) %>%
   st_cast("MULTILINESTRING")
 
 # Monthly SST (2021)
-sst <- read.csv("Monthly_SST_2021.csv")
-sst.rast <- sst.rast2 <- sst %>% 
-  group_split(month) %>% 
-  purrr::map(., ~rasterFromXYZ(.[,c('x','y','sst')], crs = 4326)) %>% 
+sst <- read.csv("Data/Monthly_SST_2021.csv")
+sst.rast <- sst.rast2 <- sst %>%
+  group_split(month) %>%
+  purrr::map(., ~rasterFromXYZ(.[,c('x','y','sst')], crs = 4326)) %>%
   raster::brick()
 
 # Offshore wind leases
-wind <- st_read("NE_Offshore_Wind.shp")
+wind <- st_read("Data/NE_Offshore_Wind.shp")
 wind$State <- gsub(pattern = "Massachussets", "Massachusetts", wind$State)  #fix typo
 
 
@@ -46,7 +46,7 @@ tracks.pal <- colorFactor("Dark2", factor(tracks$id))
 poly.pal <- colorFactor("Set3", factor(wind$State))
 
 sst.range <- range(as.vector(values(sst.rast)), na.rm = TRUE)
-rast.pal2 <- colorNumeric(palette = viridis::viridis(100, option = 'magma'),
+rast.pal2 <- colorNumeric('magma',
                           domain = sst.range,
                           na.color = "transparent")
 
@@ -63,10 +63,10 @@ ui <- fluidPage(title = "Animal Movement, Offshore Wind Development, and SST",
 ### Server ###
 
 server <- function(input, output, session) {
-  
+
   output$mymap <- renderLeaflet({
-    
-  leaflet() %>% 
+
+  leaflet() %>%
     addProviderTiles(provider = providers$Esri.OceanBasemap, group = "Ocean Basemap") %>%
     addProviderTiles(provider = providers$Esri.WorldImagery, group = "World Imagery") %>%
     addProviderTiles(provider = providers$OpenStreetMap, group = "Open Street Map") %>%
@@ -115,9 +115,9 @@ server <- function(input, output, session) {
                activeColor = "#3D535D",
                completedColor = "#7D4479") %>%
     addMouseCoordinates()
-  
+
   })  #close renderLeaflet
-  
+
 }  #close server function
 
 

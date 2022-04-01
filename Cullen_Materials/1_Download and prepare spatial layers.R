@@ -17,7 +17,7 @@ source('Cullen_Materials/helper functions.R')
 
 ### Download monthly SST for 2021 ###
 
-xpos <- c(-77, -68) 
+xpos <- c(-77, -68)
 ypos <- c(35, 45)
 tpos <- c("2021-01-16", "2021-12-16")
 sstInfo <- rerddap::info('jplMURSST41mday')
@@ -45,9 +45,9 @@ ggplot() +
 
 
 # Convert to RasterBrick to reduce raster resolution
-sst.rast2 <- sst.rast %>% 
-  group_split(month) %>% 
-  purrr::map(., ~rasterFromXYZ(.[,c('x','y','sst')], digits = 2, crs = 4326)) %>% 
+sst.rast2 <- sst.rast %>%
+  group_split(month) %>%
+  purrr::map(., ~rasterFromXYZ(.[,c('x','y','sst')], digits = 2, crs = 4326)) %>%
   raster::brick()
 
 sst.coarse <- raster::aggregate(sst.rast2, fact = 4)  #convert to 4 km res
@@ -58,9 +58,9 @@ plot(sst.coarse)
 
 
 # Convert aggregated RasterBrick to data.frame for ggplot and export
-sst.coarse.df <- sst.coarse %>% 
-  as.data.frame(xy = TRUE) %>% 
-  pivot_longer(cols = -c('x','y'), names_to = 'month', values_to = 'sst') %>% 
+sst.coarse.df <- sst.coarse %>%
+  as.data.frame(xy = TRUE) %>%
+  pivot_longer(cols = -c('x','y'), names_to = 'month', values_to = 'sst') %>%
   mutate(month = str_replace(month, "sst.", ""))
 
 # Plot coarse monthly SST
@@ -82,7 +82,7 @@ ggplot() +
 # Obtained from BOEM (https://www.boem.gov/renewable-energy/mapping-and-data/renewable-energy-gis-data)
 
 # only import relevant polygons
-wind <- st_read("Cullen_Materials/BOEM-Renewable-Energy-Shapefiles_1/BOEMWindLeases_OutlinePolys.shp") %>% 
+wind <- st_read("Cullen_Materials/Data/BOEM-Renewable-Energy-Shapefiles_1/BOEMWindLeases_OutlinePolys.shp") %>%
   st_transform(4326)
 
 
@@ -107,11 +107,11 @@ ggplot() +
 # choose different starting points (lon, lat) in Mid-Atlantic Bight
 # using locator() function and clicking on different parts of map
 sim.tracks <- data.frame(x = c(-71.50604, -75, -72, -71, -73),
-                         y = c(39.71869, 37, 38.5, 40, 39)) %>% 
-  st_as_sf(., coords = c('x','y'), crs = 4326) %>% 
+                         y = c(39.71869, 37, 38.5, 40, 39)) %>%
+  st_as_sf(., coords = c('x','y'), crs = 4326) %>%
   st_transform(3395) %>%   # transform to World Mercator projection to units are meters
   mutate(x = st_coordinates(.)[,1],
-         y = st_coordinates(.)[,2]) %>% 
+         y = st_coordinates(.)[,2]) %>%
   st_drop_geometry()
 
 # split sim.tracks starting locs into a list (to be used when simulating tracks)
@@ -139,20 +139,20 @@ toc()
 
 
 # Add starting coordinates to all obs for each track
-tracks.df<- tracks %>% 
+tracks.df<- tracks %>%
   map2(.x = ., .y = sim.tracks.list,
-       ~{.x %>% 
+       ~{.x %>%
            mutate(x = x + .y[,1],
                   y = y + .y[,2])
-       }) %>% 
+       }) %>%
   bind_rows()
 
 # Convert tracks back to Long/Lat and store as data.frame
-tracks.df2 <- tracks.df %>% 
-  st_as_sf(., coords = c('x','y'), crs = 3395) %>% 
-  st_transform(4326) %>% 
+tracks.df2 <- tracks.df %>%
+  st_as_sf(., coords = c('x','y'), crs = 3395) %>%
+  st_transform(4326) %>%
   mutate(x = st_coordinates(.)[,1],
-         y = st_coordinates(.)[,2]) %>% 
+         y = st_coordinates(.)[,2]) %>%
   st_drop_geometry()
 
 
@@ -174,8 +174,8 @@ ggplot() +
 
 ### Export spatial layers ###
 
-# write.csv(sst.coarse.df, "Cullen_Materials/Monthly_SST_2021.csv", row.names = FALSE)
+# write.csv(sst.coarse.df, "Cullen_Materials/Data/Monthly_SST_2021.csv", row.names = FALSE)
 
-# st_write(wind, "Cullen_Materials/NE_Offshore_Wind.shp", driver = "ESRI Shapefile", append = F)
+# st_write(wind, "Cullen_Materials/Data/NE_Offshore_Wind.shp", driver = "ESRI Shapefile", append = F)
 
-# write.csv(tracks.df2, "Cullen_Materials/Simulated tracks.csv", row.names = FALSE)
+# write.csv(tracks.df2, "Cullen_Materials/Data/Simulated tracks.csv", row.names = FALSE)
